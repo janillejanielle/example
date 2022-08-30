@@ -5,13 +5,17 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.example.models.Cart;
 import com.api.example.models.Product;
+
+import io.swagger.annotations.ApiOperation;
 
 /**
  * Endpoints da API REST para manipular a classe Product
@@ -24,9 +28,12 @@ import com.api.example.models.Product;
  */
 
 @RestController
+@CrossOrigin(origins = "*")
 public class ProductServiceController {
     
     private static List<Product> products = new ArrayList<Product>();
+
+    private static Cart cart;
 
     static {
 
@@ -39,31 +46,45 @@ public class ProductServiceController {
     }
 
 
-    //Adicionando um novo produto
-    @RequestMapping(value = "/products", method = RequestMethod.POST)
-    public ResponseEntity<Object> createProduct(@RequestBody Product product){
-
-        products.add(product);
-        return new ResponseEntity<>("Produto inserido com sucesso!", HttpStatus.CREATED);
-
-    }
-
     //Pesquisando um produto por Id
-    @RequestMapping(value = "/products/{id}")
+    @ApiOperation(value = "Buscando um produto por Id")
+    @RequestMapping(value = "/products/{id}", method = RequestMethod.GET)
     public ResponseEntity<Object> getProduct(@PathVariable("id") int id){
 
         return new ResponseEntity<>(products.get(id), HttpStatus.OK);
 
     }
 
+    @ApiOperation(value = "Adicionar um novo produto")
+    @RequestMapping(value = "/products", method = RequestMethod.POST, produces="application/json", consumes="application/json")
+    public ResponseEntity<Object> createProduct(@RequestBody Product product){
+
+        System.out.println("-------->> Product:");
+        System.out.println(product);
+
+        products.add(product);
+        return new ResponseEntity<>("Produto inserido com sucesso!", HttpStatus.OK);
+
+    }
+
+    //Pesquisando um produto por Id
+    // @RequestMapping(value = "/products/{id}")
+    // public ResponseEntity<Object> getProduct(@PathVariable("id") int id){
+
+    //     return new ResponseEntity<>(products.get(id), HttpStatus.OK);
+
+    // }
+
     //Listando todos os produtos
-    @RequestMapping(value = "/products",method = RequestMethod.GET)
+    @ApiOperation(value="Listar todos os produtos")
+    @RequestMapping(value = "/products",method = RequestMethod.GET, produces="application/json")
     public ResponseEntity<Object> getProducts(){
         return new ResponseEntity<>(products,HttpStatus.OK);
     }
 
     //Atualizando um produto por Id
-    @RequestMapping(value = "/products/{id}", method = RequestMethod.PUT)
+    @ApiOperation(value = "Atualizar informações de um produto")
+    @RequestMapping(value = "/products/{id}", method = RequestMethod.PUT, produces="application/json", consumes="application/json")
     public ResponseEntity<Object> updateProduct(@PathVariable("id") int id, @RequestBody Product product){
 
         products.remove(id);
@@ -75,12 +96,20 @@ public class ProductServiceController {
     }
 
     //Removendo um produto por Id
-    @RequestMapping(value = "/products/{id}", method = RequestMethod.DELETE)
+    @ApiOperation(value = "Excluir um produto")
+    @RequestMapping(value = "/products/{id}", method = RequestMethod.DELETE, produces="application/json")
     public ResponseEntity<Object> deleteProduct(@PathVariable("id") int id){
 
         products.remove(id);
         return new ResponseEntity<>("Produto removido com sucesso!", HttpStatus.OK);
 
+    }
+
+    @ApiOperation(value = "Criar novo carrinho")
+    @RequestMapping(value = "/cart", method = RequestMethod.POST, produces="application/json")
+    public ResponseEntity<Object> createCart(@RequestBody int id){
+        cart = new Cart(id);
+        return new ResponseEntity<>("Carrinho criado com sucesso!", HttpStatus.OK);
     }
 
 }
